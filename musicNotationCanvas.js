@@ -2,10 +2,15 @@
 // musicNotationCanvas.js
 //
 //------------------------------------------------------------------------------
-// assumes there is a html tag <canvas id='myCanvas'> on the page
+// assumes there is a canvas element with the id matching the canvas_id param
+// if no param the default id is 'myCanvas' <canvas id='myCanvas'> is assumed on the page
 //
 
-var Notation = (function() {
+function MusicNotation(canvas_id) {
+
+var canvasID = canvas_id? canvas_id : 'myCanvas';
+var canvas = document.getElementById(canvasID);
+var ctx = canvas.getContext("2d");
 
 // line5 value determines the vertical location of the staff
 var line5 = 40; 
@@ -49,9 +54,6 @@ var my36Font = "36px Maestro";
 var my24Font = "24px Maestro";
 
 var lastAnimatedNote; // so you can turn it back to normal as you animate another note
-
-var canvas = document.getElementById("myCanvas");
-var ctx = canvas.getContext("2d");
 
 var TrebleStaffMap = {  
     "Ebb3" : spaceBelowLedger3, "Eb3" : spaceBelowLedger3, "E3" : spaceBelowLedger3, "E#3" : spaceBelowLedger3, "Ex3" : spaceBelowLedger3, 
@@ -903,4 +905,4 @@ function setNoteSpacing(spacing) {
 		setNoteSpacing: setNoteSpacing
 	};
 
-})();
+}
