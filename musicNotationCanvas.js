@@ -284,6 +284,14 @@ var LINE_LENGTH = 600;
 var startX = 10 + xLocOffset;
 var startY = yLocOffset;
 
+var xLocFlagOffset = 10*scaleFactor;
+var yLocFlagOffset = -2*scaleFactor;
+var DOWNSTEM_FLAG_OFFSET = 9*scaleFactor;
+var FLAG_LENGTH = 10*scaleFactor;
+var FLAG_SPACING = 6*scaleFactor;
+var DOT_OFFSET = 10*scaleFactor;
+
+
 function drawTheStaff(staff_len) {
     var staff_length = (staff_len === undefined)? LINE_LENGTH: staff_len;
     ctx.beginPath();
@@ -305,7 +313,6 @@ function drawDownStem(x, y) {
     ctx.moveTo(startX-STEM_OFFSET, startY);
     ctx.lineTo(startX-STEM_OFFSET, startY + STEM_LENGTH);
 	ctx.lineWidth = 1;
-//	ctx.strokeStyle = "#000000";
 	ctx.stroke();
 	ctx.closePath();
 }
@@ -318,7 +325,6 @@ function drawUpStem(x, y) {
     ctx.moveTo(startX+STEM_OFFSET, startY);
     ctx.lineTo(startX+STEM_OFFSET, startY - STEM_LENGTH);
 	ctx.lineWidth = 1;
-//	ctx.strokeStyle = "#000000";
 	ctx.stroke();
 	ctx.closePath();
 }
@@ -327,15 +333,20 @@ function drawTheNote(xLoc, note, duration) {
     var noteLoc = TrebleStaffMap[note];
     var myDuration = (duration === undefined)? "q": duration;
     var stemDirection = (noteLoc > line3);
+/*------------------------------------
     if(myDuration !== 'q') {
         if(stemDirection === false && duration === 'e') { // down stem
             myDuration = myDuration + '-downstem';
         }
         return drawFont(xLoc, noteLoc, myDuration);
     }
-    drawNoteHead(xLoc, noteLoc);
+//--------------------------------------*/
+
+    drawNoteHead(xLoc, noteLoc, myDuration);
     drawStem(xLoc, noteLoc, stemDirection);
-    // drawFlag(xLoc, noteLoc, stemDirection)
+    if(myDuration.includes("e") || myDuration.includes("x") ) {
+        drawFlag(xLoc, noteLoc, stemDirection, myDuration)
+    }
 }
 
 
@@ -348,34 +359,84 @@ function drawStem(xLoc, noteLoc, stemDirection) {
 }
 
 
+function drawFlag(xLoc, noteLoc, stemDirection, duration) {
+    if(stemDirection === true) {
+       drawUpStemFlag(xLoc, noteLoc, duration);
+    } else {
+       drawDownStemFlag(xLoc, noteLoc, duration);    
+    }
+}
 
-function drawNoteHead(x, y) {
+
+function drawDownStemFlag(x, y, duration) {
+	var startX = x + xLocFlagOffset - DOWNSTEM_FLAG_OFFSET;
+	var startY = y + 2*yLocFlagOffset + STEM_LENGTH;
+
+	ctx.beginPath();
+	ctx.lineWidth = 3;
+    ctx.moveTo(startX, startY);
+    ctx.lineTo((startX + FLAG_LENGTH), (startY - FLAG_LENGTH));
+	ctx.stroke();
+	ctx.closePath();
+	if(duration.includes("x")) {
+	    ctx.beginPath();
+	    ctx.lineWidth = 3;
+        ctx.moveTo(startX, startY - FLAG_SPACING);
+        ctx.lineTo((startX + FLAG_LENGTH), (startY - FLAG_SPACING - FLAG_LENGTH));
+	    ctx.stroke();
+	    ctx.closePath();
+	}
+}
+
+function drawUpStemFlag(x, y, duration) {
+	var startX = x + xLocFlagOffset;
+	var startY = y + yLocFlagOffset - STEM_LENGTH;
+
+	ctx.beginPath();
+	ctx.lineWidth = 3;
+    ctx.moveTo(startX, startY);
+    ctx.lineTo((startX + FLAG_LENGTH), (startY + FLAG_LENGTH));
+	ctx.stroke();
+	ctx.closePath();
+	if(duration.includes("x")) {
+	    ctx.beginPath();
+	    ctx.lineWidth = 3;
+        ctx.moveTo(startX, startY + FLAG_SPACING);
+        ctx.lineTo((startX + FLAG_LENGTH), (startY + FLAG_SPACING + FLAG_LENGTH));
+	    ctx.stroke();
+	    ctx.closePath();
+	}
+}
+
+
+
+
+
+
+
+
+
+function drawNoteHead(x, y, duration) {
 	var centerX = x + xLocOffset;
 	var centerY = y + yLocOffset;
-	var radiusX = 5*scaleFactor;
-	var radiusY = 3*scaleFactor;
+	var radiusX = 4*scaleFactor;
+	var radiusY = 5*scaleFactor;
 	var rotation = 0.86;
 	
 	ctx.beginPath();
-	for (var i = 0 * Math.PI; i < 2 * Math.PI; i += 0.01 ) {
-		xPos = centerX - (radiusY * Math.sin(i)) * Math.sin(rotation * Math.PI) + (radiusX * Math.cos(i)) * Math.cos(rotation * Math.PI);
-		yPos = centerY + (radiusX * Math.cos(i)) * Math.sin(rotation * Math.PI) + (radiusY * Math.sin(i)) * Math.cos(rotation * Math.PI);
-	
-		if (i == 0) {
-			ctx.moveTo(xPos, yPos);
-		} else {
-			ctx.lineTo(xPos, yPos);
-		}
-	}
-//	ctx.fillStyle = "#000000";
-	ctx.fill();
 	ctx.lineWidth = 2;
-//	ctx.strokeStyle = "#000000";
-	ctx.stroke();
-	ctx.closePath();
+	ctx.ellipse(centerX, centerY, radiusX, radiusY, Math.PI / 3, 0, 2 * Math.PI);	
+//	ctx.stroke();
+    ctx.fill();
+    if(duration.includes(".")) {
+        ctx.ellipse(centerX+DOT_OFFSET, centerY-2, 2, 2, Math.PI / 3, 0, 2 * Math.PI);	
+        ctx.fill();
+    }
+//	ctx.closePath();
 }
-    var noteSpacing = 36;
-    var BeginningXPos = 60;
+
+//    var noteSpacing = 36;
+//    var BeginningXPos = 60;
 
 function drawBeamUnder(x1,y1,x2,y2) {
 	var startX = x1;
@@ -508,6 +569,7 @@ var durationToMusiSyncFont = {
     'q.': dottedQuarterNote,
     'q': quarterNote,
     'x' : sixteenthNote,
+//    'x-downstem' : sixteenthNoteDownStem,
     'er': eighthRest,
     'Er': eighthRest,
     'qr': quarterRest,
@@ -833,7 +895,6 @@ function drawScale(scaleNotes, rhythms) {
     var msg  = "drawScale(), notes = " + scaleNotes;
 //    console.log(msg);
     var i;
-//    var noteSpacing = 50;
     for (i=0; i < scaleNotes.length; i++) {
         // skip scaleNotes[i] when it's blank
         if(scaleNotes[i] != "") {
@@ -862,7 +923,7 @@ function drawChord(xLoc, chordNotes) {
     var msg  = "drawChord(), chordNotes = " + chordNotes;
 //    console.log(msg);
     var i;
-    var noteSpacing = 50;
+//    var noteSpacing = 50;
     for (i=0; i < chordNotes.length; i++) {
         drawChordNote(xLoc, chordNotes[i]);
     }
@@ -873,12 +934,13 @@ function drawChord(xLoc, chordNotes) {
 function drawChordProgression(chordProgression) {
     var msg  = "drawChordProgression(), chordProgression = " + chordProgression;
 //    console.log(msg);
-    var noteSpacing = 50;
+//    var noteSpacing = 50;
     var chordNotes;
     for(let j=0; j<chordProgression.length; j++) {
         chordNotes = chordProgression[j];
         for (let i=0; i < chordNotes.length; i++) {
-            drawChordNote(ctx, (noteSpacing*2)*(j+1), chordNotes[i]);
+            drawChordNote((noteSpacing*2)*(j+1), chordNotes[i]);
+//            drawChordNote(ctx, (noteSpacing*2)*(j+1), chordNotes[i]);
         }
 
     }
