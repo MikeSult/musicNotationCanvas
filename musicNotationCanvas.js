@@ -245,27 +245,6 @@ function drawStaff(staffLength) {
 }
 
 
-
-
-/*------------------------------------------
-function drawClef(clef) {
-    var msg  = "drawClef(), clef = " + clef;
-//    console.log(msg);
-    ctx.font = my36Font;
-    var yLoc = space2;  // default for treble clef
-    var xLoc = 20;
-    if (clef == "treble") {
-        ctx.fillText("&", xLoc, yLoc);
-    }
-    if (clef == "bass") {
-        yLoc = line5 + lineSpaceScale*2;
-        ctx.fillText("?", xLoc, yLoc);
-    }
-}
-
----------------------------------------------------*/
-
-
 function getNoteDuration(duration, stemDirection) {
     if(stemDirection == true || duration === "w" || duration === "W") // true means up stem
         return duration;  // up stem note
@@ -306,24 +285,24 @@ function drawTheStaff(staff_len) {
 
 
 function drawDownStem(x, y) {
-	var startX = x + xLocOffset;;
-	var startY = y + yLocOffset;;
+	var startX = x + xLocOffset - STEM_OFFSET;
+	var startY = y + yLocOffset;
 
 	ctx.beginPath();
-    ctx.moveTo(startX-STEM_OFFSET, startY);
-    ctx.lineTo(startX-STEM_OFFSET, startY + STEM_LENGTH);
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(startX, startY + STEM_LENGTH);
 	ctx.lineWidth = 1;
 	ctx.stroke();
 	ctx.closePath();
 }
 
 function drawUpStem(x, y) {
-	var startX = x + xLocOffset;;
+	var startX = x + xLocOffset + STEM_OFFSET;
 	var startY = y + yLocOffset;;
 
 	ctx.beginPath();
-    ctx.moveTo(startX+STEM_OFFSET, startY);
-    ctx.lineTo(startX+STEM_OFFSET, startY - STEM_LENGTH);
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(startX, startY - STEM_LENGTH);
 	ctx.lineWidth = 1;
 	ctx.stroke();
 	ctx.closePath();
@@ -343,7 +322,9 @@ function drawTheNote(xLoc, note, duration) {
 //--------------------------------------*/
 
     drawNoteHead(xLoc, noteLoc, myDuration);
-    drawStem(xLoc, noteLoc, stemDirection);
+    if(!myDuration.includes("w") && !myDuration.includes("W") ) {
+        drawStem(xLoc, noteLoc, stemDirection);
+    }
     if(myDuration.includes("e") || myDuration.includes("x") ) {
         drawFlag(xLoc, noteLoc, stemDirection, myDuration)
     }
@@ -409,25 +390,23 @@ function drawUpStemFlag(x, y, duration) {
 }
 
 
-
-
-
-
-
-
-
 function drawNoteHead(x, y, duration) {
 	var centerX = x + xLocOffset;
 	var centerY = y + yLocOffset;
-	var radiusX = 4*scaleFactor;
-	var radiusY = 5*scaleFactor;
+	var radiusX = 3*scaleFactor;
+	var radiusY = 4*scaleFactor;
 	var rotation = 0.86;
 	
 	ctx.beginPath();
 	ctx.lineWidth = 2;
 	ctx.ellipse(centerX, centerY, radiusX, radiusY, Math.PI / 3, 0, 2 * Math.PI);	
-//	ctx.stroke();
-    ctx.fill();
+    if(duration.includes("w") || duration.includes("h") || duration.includes("W") || duration.includes("H") ) {
+	    ctx.stroke();
+    } else {
+	    ctx.stroke();
+        ctx.fill();
+    }
+    
     if(duration.includes(".")) {
         ctx.ellipse(centerX+DOT_OFFSET, centerY-2, 2, 2, Math.PI / 3, 0, 2 * Math.PI);	
         ctx.fill();
@@ -541,8 +520,27 @@ var meter9_8 = String.fromCharCode(40);
 var meter12_8 = String.fromCharCode(192);
 
 
+/*------------------------------------------
+function drawClef(clef) {
+    var msg  = "drawClef(), clef = " + clef;
+//    console.log(msg);
+    ctx.font = my36Font;
+    var yLoc = space2;  // default for treble clef
+    var xLoc = 20;
+    if (clef == "treble") {
+        ctx.fillText("&", xLoc, yLoc);
+    }
+    if (clef == "bass") {
+        yLoc = line5 + lineSpaceScale*2;
+        ctx.fillText("?", xLoc, yLoc);
+    }
+}
+
+---------------------------------------------------*/
+
+
 function drawClef(clef, xLocation) {
-    var msg  = "drawClef2(), clef = " + clef;
+    var msg  = "drawClef(), clef = " + clef;
     var xLoc = xLocation ? xLocation : 20;
 //    console.log(msg);
     ctx.font = myTrebleClefFont;
